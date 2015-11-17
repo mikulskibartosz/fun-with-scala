@@ -12,7 +12,7 @@ import name.mikulskibartosz.funwithscala.oo.questions.Answer
  * Incorrect answers:
  * {a question}? {the user's answer} correct: {the correct answer}
  */
-class ResultFormatter {
+object FormatResult {
 
   /**
    * The format of the result used if the user has not made a mistake.
@@ -36,7 +36,7 @@ class ResultFormatter {
    * @param incorrectAnswers a list of answers
    * @return the formatted result
    */
-  def format(numberOfCorrectAnswers: Int, incorrectAnswers: List[Answer]): String = {
+  def apply(numberOfCorrectAnswers: Int, incorrectAnswers: List[Answer]): String = {
     val formattedIncorrectAnswers = incorrectAnswers
       .map{a => (a.question, a)}
       .map{

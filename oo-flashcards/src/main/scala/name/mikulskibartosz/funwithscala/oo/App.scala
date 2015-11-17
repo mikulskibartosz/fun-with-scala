@@ -1,6 +1,6 @@
 package name.mikulskibartosz.funwithscala.oo
 
-import name.mikulskibartosz.funwithscala.oo.formatters.{QuestionFormatter, ResultFormatter}
+import name.mikulskibartosz.funwithscala.oo.formatters.{FormatQuestion, FormatResult}
 import name.mikulskibartosz.funwithscala.oo.io.{ConsoleReader, ConsoleWriter}
 import name.mikulskibartosz.funwithscala.oo.questions.InMemoryQuestionRepository
 
@@ -9,8 +9,8 @@ object App {
     val flashcards = new Flashcards(
       new ConsoleReader(),
       new ConsoleWriter(),
-      new QuestionFormatter(),
-      new ResultFormatter(),
+      FormatQuestion.apply,
+      FormatResult.apply,
       new InMemoryQuestionRepository())
 
     flashcards.run(5)

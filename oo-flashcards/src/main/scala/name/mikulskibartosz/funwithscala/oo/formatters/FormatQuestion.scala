@@ -5,7 +5,7 @@ import name.mikulskibartosz.funwithscala.oo.questions.Question
 /**
  * Formats a questions. Returns it in the following format: "> translate: {question}"
  */
-class QuestionFormatter {
+object FormatQuestion {
   /**
    * The format of a question.
    */
@@ -17,5 +17,5 @@ class QuestionFormatter {
    * @param question the question
    * @return the formatted question
    */
-  def format(question: Question) = String.format(lineFormat, question.question)
+  def apply(question: Question) = String.format(lineFormat, question.question)
 }
