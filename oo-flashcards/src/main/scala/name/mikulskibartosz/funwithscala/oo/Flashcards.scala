@@ -3,14 +3,16 @@ package name.mikulskibartosz.funwithscala.oo
 import name.mikulskibartosz.funwithscala.oo.io.{InputReader, OutputWriter}
 import name.mikulskibartosz.funwithscala.oo.questions.{Answer, Question, QuestionRepository}
 
+import scalaz.effect.IO
+
 /**
  * Displays n questions, collects the answers and shows the result.
  */
 class Flashcards(
                   val inputReader: InputReader,
                   val outputWriter: OutputWriter,
-                  val questionFormatter: (Question) => String,
-                  val resultFormatter: (Int, List[Answer]) => String,
+                  val formatQuestion: (Question) => String,
+                  val formatResult: (Int, List[Answer]) => String,
                   val questionRepository: QuestionRepository) {
   /**
    * Displays n questions, collects the answers and shows the result.
@@ -18,16 +20,18 @@ class Flashcards(
    * @param numberOfQuestions the number of questions to be displayed
    */
   def run(numberOfQuestions: Int) = {
-    val questions = questionRepository.get(numberOfQuestions)
-
-    val answers = for(
-      question <- questions;
-    ) yield askQuestion(question)
-
-    val numberOfCorrectAnswers = answers.count(_.isCorrect)
-    val incorrectAnswers = answers.filter(a => !a.isCorrect)
-    val formattedResult = resultFormatter(numberOfCorrectAnswers, incorrectAnswers)
-    outputWriter.writeLine(formattedResult)
+    IO {
+      questionRepository.get(numberOfQuestions) //TODO remove parameter
+    }.map(for (question <- _) yield askQuestion(question))
+      .map(answers => {
+      answers.count(_.isCorrect) -> answers.filter(a => !a.isCorrect)
+    }).map {
+      case (correctNo, incorrect) => formatResult(correctNo, incorrect)
+    }.flatMap(
+        result => IO[Unit] {
+          outputWriter.writeLine(result)
+        }
+      ).unsafePerformIO()
   }
 
   /**
@@ -36,20 +40,13 @@ class Flashcards(
    * @param question the question
    * @return the user's answer
    */
-  private def askQuestion(question: Question) = {
-    val formattedQuestion = questionFormatter(question)
-    val answer = askQuestion(formattedQuestion)
-    Answer(question, answer)
-  }
-
-  /**
-   * Prints the question and returns the answer.
-   *
-   * @param question the question
-   * @return the user's answer
-   */
-  private def askQuestion(question: String) = {
-    outputWriter.writeLine(question)
-    inputReader.readLine
+  private def askQuestion(question: Question): Answer = {
+    val formattedQuestion = formatQuestion(question)
+    IO{
+      outputWriter.writeLine(formattedQuestion)
+      inputReader.readLine
+    }
+    .map(Answer(question, _))
+    .unsafePerformIO()
   }
 }
